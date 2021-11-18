@@ -9,8 +9,7 @@ setup(
     author_email='cpolhout@gmail.com',    
     license='BSD 2-clause',
     packages=find_packages(exclude=["tests", "generator"]),
-    install_requires=["aiohttp">="3.7.3", "async-timeout">="4.0.1"],
-
+    install_requires=["aiohttp", "async-timeout"],
     classifiers=[
         'Development Status :: 1 - Planning',
         'Intended Audience :: Science/Research',
