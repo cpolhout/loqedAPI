@@ -1,0 +1,13 @@
+Metadata-Version: 1.1
+Name: aiohttpclient
+Version: 0.0.3
+Summary: UNKNOWN
+Home-page: https://github.com/caowenbin/aioclient
+Author: caowenbin
+Author-email: cwb201314@qq.com
+License: BSD
+Download-URL: https://github.com/caowenbin/aioclient
+Description: UNKNOWN
+Keywords: request client,asyncio,python3.6
+Platform: UNKNOWN
+Classifier: Programming Language :: Python :: 3.6
