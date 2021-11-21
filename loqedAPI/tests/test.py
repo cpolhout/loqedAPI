@@ -2,9 +2,9 @@ import asyncio
 import aiohttp
 import logging
 
-from ..pyloqed import APIClient
-from ..pyloqed import LoqedAPI
-from ..pyloqed import Lock
+from ..loqed import APIClient
+from ..loqed import LoqedAPI
+from ..loqed import Lock
 
 logging.basicConfig(level=logging.DEBUG)
 
