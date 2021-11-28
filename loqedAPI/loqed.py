@@ -19,10 +19,10 @@ log = logging.getLogger("trace")
 class AbstractAPIClient():
     """Client to handle API calls."""
 
-    def __init__(self, websession: ClientSession):
+    def __init__(self, websession: ClientSession, host):
         """Initialize the client."""
         self.websession = websession
-        # self.host = host
+        self.host = host
         print("API CLIENT CREATED")
 
     @abstractmethod
