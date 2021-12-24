@@ -65,6 +65,7 @@ class Lock:
         """Initialize a lock object."""
         self.raw_data = raw_data
         self.apiclient = apiclient
+    
 
     @property
     def id(self) -> str:
@@ -137,6 +138,12 @@ class Lock:
         resp = await self.apiclient.request("get", f"locks/{self.id}/bolt_state/night_lock")
         resp.raise_for_status()
         print("Response" + await resp.text())
+    
+     async def update(self):
+        "Update status"
+        resp = await self.apiclient.request("get", f"lock/{self.id}")
+        resp.raise_for_status()
+        print("Response UPDATE" + await resp.text())
 
 
 
@@ -151,7 +158,7 @@ class LoqedAPI:
         resp = await self.apiclient.request("get", "locks")
         print("Response" + await resp.text())
         json_data = await resp.json()
-        return [Lock(lock_data, self.apiclient) for lock_data in json_data["data"]]
+        return [lock_data, self.apiclient) for lock_data in json_data["data"]]
         resp.raise_for_status()
 
     async def async_get_lock(self, lock_id) -> Lock:
