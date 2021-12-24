@@ -139,7 +139,7 @@ class Lock:
         resp.raise_for_status()
         print("Response" + await resp.text())
     
-     async def update(self):
+    async def update(self):
         "Update status"
         resp = await self.apiclient.request("get", f"lock/{self.id}")
         resp.raise_for_status()
