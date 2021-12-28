@@ -141,9 +141,14 @@ class Lock:
     
     async def update(self):
         "Update status"
-        resp = await self.apiclient.request("get", f"lock/{self.id}")
+        resp = await self.apiclient.request("get", "locks")
         resp.raise_for_status()
-        print("Response UPDATE" + await resp.text())
+        json_data = await resp.json()
+        for lock_data in json_data["data"]:
+            if lock_data.id==self.id:
+                self.raw_data=lock_data
+        print("Response UPDATED" + await resp.text())
+
 
 
 
