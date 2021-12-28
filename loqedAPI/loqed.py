@@ -158,14 +158,16 @@ class LoqedAPI:
         resp = await self.apiclient.request("get", "locks")
         print("Response" + await resp.text())
         json_data = await resp.json()
-        return [(lock_data) for lock_data in json_data["data"]]
+        return [Lock(lock_data, self.apiclient) for lock_data in json_data["data"]]
         resp.raise_for_status()
 
-    async def async_get_lock(self, lock_id) -> Lock:
-        """Return a Lock."""
-        resp = await self.apiclient.request("get", f"lock/{id}")
-        resp.raise_for_status()
-        return Lock(await resp.json(), self.apiclient)
+
+# NOT supported in API Yet
+    # async def async_get_lock(self, lock_id) -> Lock:
+    #     """Return a Lock."""
+    #     resp = await self.apiclient.request("get", f"lock/{lock_id}")
+    #     resp.raise_for_status()
+    #     return Lock(await resp.json(), self.apiclient)
 
 
 
