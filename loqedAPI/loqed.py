@@ -145,7 +145,7 @@ class Lock:
         resp.raise_for_status()
         json_data = await resp.json()
         for lock_data in json_data["data"]:
-            if lock_data.id==self.id:
+            if lock_data.id==self.raw_data["id"]:
                 self.raw_data=lock_data
         print("Response UPDATED" + await resp.text())
 
