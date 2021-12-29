@@ -133,9 +133,15 @@ class Lock:
         resp.raise_for_status()
         print("Response" + await resp.text())
 
-    async def close(self):
+    async def lock(self):
         "Set night-lock"
         resp = await self.apiclient.request("get", f"locks/{self.id}/bolt_state/night_lock")
+        resp.raise_for_status()
+        print("Response" + await resp.text())
+    
+    async def unlock(self):
+        "Set day-lock"
+        resp = await self.apiclient.request("get", f"locks/{self.id}/bolt_state/day_lock")
         resp.raise_for_status()
         print("Response" + await resp.text())
     
