@@ -170,8 +170,7 @@ class Lock:
         "Register webhook for this lock"
         resp = await self.apiclient.request("post", f"locks/{self.id}/webhooks", data="{" + url + "}")
         resp.raise_for_status()
-        json_data = await resp.json()
-        print("Response" + str(json_data))
+        print("Response" + await resp.text())
 
 
 
