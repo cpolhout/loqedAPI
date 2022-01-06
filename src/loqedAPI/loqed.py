@@ -163,7 +163,15 @@ class Lock:
         print("Response" + str(json_data))
         for hook in json_data["data"]:
             print("FOUND WEBHOOK:" + str(hook))
+        #self._webhooks=json_data["data"]
         return json_data["data"]
+
+    async def registerWebhook(self, url):
+        "Register webhook for this lock"
+        resp = await self.apiclient.request("post", f"locks/{self.id}/webhooks", data="{" + url + "}")
+        resp.raise_for_status()
+        json_data = await resp.json()
+        print("Response" + str(json_data))
 
 
 
