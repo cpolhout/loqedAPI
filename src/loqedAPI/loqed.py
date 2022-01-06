@@ -159,7 +159,7 @@ class Lock:
         "Get webhooks for this lock"
         resp = await self.apiclient.request("get", f"locks/{self.id}/webhooks")
         resp.raise_for_status()
-        print("Response" + resp.text())
+        print("Response" + await resp.text())
         return resp
 
 
