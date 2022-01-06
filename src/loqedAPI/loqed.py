@@ -159,9 +159,11 @@ class Lock:
         "Get webhooks for this lock"
         resp = await self.apiclient.request("get", f"locks/{self.id}/webhooks")
         resp.raise_for_status()
-        print("Response" + await resp.text())
-        return resp
-
+        json_data = await resp.json()
+        print("Response" + str(json_data))
+        for hook in json_data["data"]:
+            print("FOUND WEBHOOK:" + hook)
+        return json_data["data"]
 
 
 
@@ -177,7 +179,6 @@ class LoqedAPI:
         print("Response" + await resp.text())
         json_data = await resp.json()
         return [Lock(lock_data, self.apiclient) for lock_data in json_data["data"]]
-        resp.raise_for_status()
 
 
 # NOT supported in API Yet
