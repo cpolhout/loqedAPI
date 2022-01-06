@@ -162,7 +162,7 @@ class Lock:
         json_data = await resp.json()
         print("Response" + str(json_data))
         for hook in json_data["data"]:
-            print("FOUND WEBHOOK:" + hook)
+            print("FOUND WEBHOOK:" + str(hook))
         return json_data["data"]
 
 
