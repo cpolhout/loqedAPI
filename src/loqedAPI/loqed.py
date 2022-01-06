@@ -168,7 +168,7 @@ class Lock:
 
     async def registerWebhook(self, url):
         "Register webhook for this lock"
-        resp = await self.apiclient.request("post", f"locks/{self.id}/webhooks", data=b"{" + url + "}")
+        resp = await self.apiclient.request("post", f"locks/{self.id}/webhooks", data=b"{{url}}")
         resp.raise_for_status()
         print("Response" + await resp.text())
 
