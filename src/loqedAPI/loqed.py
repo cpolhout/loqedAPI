@@ -155,11 +155,11 @@ class Lock:
                 self.raw_data=lock_data
         print("Response UPDATED" + await resp.text())
 
-    def getWebhooks(self):
+    async def getWebhooks(self):
         "Get webhooks for this lock"
         resp = await self.apiclient.request("get", f"locks/{self.id}/webhooks")
         resp.raise_for_status()
-        print("Response" + await resp.text())
+        print("Response" + resp.text())
         return resp
 
 
