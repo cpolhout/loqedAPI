@@ -89,10 +89,10 @@ class Lock:
         """Return the name of the lock."""
         return self.raw_data["battery_type"]
 
-    @property
-    def bolt_state(self) -> str:
-        """Return the state of the lock."""
-        return self.bolt_state
+    # @property
+    # def bolt_state(self) -> str:
+    #     """Return the state of the lock."""
+    #     return self.bolt_state
 
     @property
     def party_mode(self) -> bool:
