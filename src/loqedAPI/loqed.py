@@ -65,6 +65,7 @@ class Lock:
         """Initialize a lock object."""
         self.raw_data = raw_data
         self.apiclient = apiclient
+        self._webhooks = {}
     
 
     @property
@@ -163,13 +164,14 @@ class Lock:
         print("Response" + str(json_data))
         for hook in json_data["data"]:
             print("FOUND WEBHOOK:" + str(hook))
-        #self._webhooks=json_data["data"]
+        self._webhooks=json_data["data"]
         return json_data["data"]
 
     async def registerWebhook(self, url):
         "Register webhook for this lock"
         resp = await self.apiclient.request("post", f"locks/{self.id}/webhooks", json={"url": url})
         resp.raise_for_status()
+        await self.getWebhooks()
         print("Response" + await resp.text())
 
 
