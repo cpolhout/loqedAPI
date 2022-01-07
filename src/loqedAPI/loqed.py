@@ -65,7 +65,8 @@ class Lock:
         """Initialize a lock object."""
         self.raw_data = raw_data
         self.apiclient = apiclient
-        self._webhooks = {}
+        self.webhooks = {}
+        self.bolt_state=self.raw_data["bolt_state"]
     
 
     @property
@@ -90,8 +91,8 @@ class Lock:
 
     @property
     def bolt_state(self) -> str:
-        """Return the name of the lock."""
-        return self.raw_data["bolt_state"]
+        """Return the state of the lock."""
+        return self.bolt_state
 
     @property
     def party_mode(self) -> bool:
@@ -154,6 +155,7 @@ class Lock:
         for lock_data in json_data["data"]:
             if lock_data["id"]==self.raw_data["id"]:
                 self.raw_data=lock_data
+                self.bolt_state=self.raw_data["bolt_state"]
         print("Response UPDATED" + await resp.text())
 
     async def getWebhooks(self):
@@ -164,7 +166,7 @@ class Lock:
         print("Response" + str(json_data))
         for hook in json_data["data"]:
             print("FOUND WEBHOOK:" + str(hook))
-        self._webhooks=json_data["data"]
+        self.webhooks=json_data["data"]
         return json_data["data"]
 
     async def registerWebhook(self, url):
@@ -173,6 +175,9 @@ class Lock:
         resp.raise_for_status()
         await self.getWebhooks()
         print("Response" + await resp.text())
+
+    async def updateState(self, state):
+        self.bolt_state=state
 
 
 
@@ -211,32 +216,3 @@ class LoqedAuthenticationException(LoqedException):
     """Raise this when there is an authentication issue."""
 
 
-    # def get_locks(self):
-    #         """Return a list of kiwi locks."""
-    #         self._with_valid_session()
-    #         sensor_list = requests.get(
-    #             API_LIST_DOOR_URL,
-    #             params={"session_key": self.__session_key, "page_size": 999},
-    #             headers={"Accept": "application/json"},
-    #             timeout=self.__timeout
-    #         )
-    #         if not sensor_list.ok:
-    #             _LOGGER.error("could not get your KIWI doors.")
-    #             return []
-
-    #         doors = sensor_list.json()['result']['sensors']
-    #         return doors
-
-    # def open_door(self, door_id):
-    #     """Open the kiwi door lock."""
-    #     self._with_valid_session()
-    #     open_response = requests.post(
-    #         API_OPEN_DOOR_URL.format(door_id),
-    #         headers={"Accept": "application/json"},
-    #         params={"session_key": self.__session_key},
-    #         timeout=self.__timeout
-    #     )
-    #     if not open_response.ok:
-    #         raise KiwiException(
-    #             "Could not open door",
-    #             {'status_code': open_response.status_code}
