@@ -4,13 +4,26 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
-        
-
+        {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "env": { "PYTHONPATH": "./src"},
+            "justMyCode": true
+        },
         {
             "name": "Python: Module",
             "type": "python",
             "request": "launch",
-            "module": "loqedAPI.tests"
+            "module": "tests.",
+            "cwd": "${workspaceRoot}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/src/"
+            },
+            "envFile": "${workspaceRoot}/.venv",
+            "justMyCode": true
         }
     ]
 }
