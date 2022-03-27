@@ -64,11 +64,12 @@ class APIClient(AbstractAPIClient):
 class Lock:
     """Class that represents a Lock object in the LoqedAPI."""
 
-    def __init__(self, raw_data: dict, secret: str, bridgekey: str, name: str, apiclient: APIClient):
+    def __init__(self, raw_data: dict, secret: str, bridgekey: str, key_id: int, name: str, apiclient: APIClient):
         """Initialize a lock object."""
         self.raw_data = raw_data
         self.secret = secret
         self.bridgekey = bridgekey
+        self.key_id=key_id
         self.apiclient = apiclient
         self.webhooks = {}        
         self.name = name
@@ -131,7 +132,7 @@ class Lock:
     #     """Return the name of the lock."""
     #     return self.raw_data["supported_lock_states"]
 
-    def getcommand(self,action,local_key_id):
+    def getcommand(self,action):
         messageId=0
         protocol = 2
         command_type = 7
@@ -139,33 +140,33 @@ class Lock:
         messageId_bin = struct.pack("Q", messageId)
         protocol_bin = struct.pack("B", protocol)
         command_type_bin = struct.pack("B", command_type)
-        local_key_id_bin = struct.pack("B", local_key_id)
+        local_key_id_bin = struct.pack("B", self.key_id)
         device_id_bin = struct.pack("B", device_id)
         action_bin =  struct.pack("B", action)
         now=int(time.time())
         timenow_bin=now.to_bytes(8, 'big', signed=False)
-        local_generated_binary_hash = protocol_bin + command_type_bin + timenow_bin + local_key_id_bin + device_id_bin + action_bin
+        local_generated_binary_hash = protocol_bin + command_type_bin + timenow_bin + self.key_id + device_id_bin + action_bin
         hm=hmac.new(base64.b64decode(self.secret), local_generated_binary_hash,hashlib.sha256).digest()
-        command = messageId_bin + protocol_bin + command_type_bin + timenow_bin + hm + local_key_id_bin + device_id_bin + action_bin
+        command = messageId_bin + protocol_bin + command_type_bin + timenow_bin + hm + self.key_id + device_id_bin + action_bin
         return urllib.parse.quote(base64.b64encode(command).decode("ascii"))
 
 
     async def open(self):
         "Open the lock"
-        command=self.getcommand(1,2)
+        command=self.getcommand(1)
         resp = await self.apiclient.request("get", f"to_lock?command_signed_base64={command}")
         resp.raise_for_status()
 
     async def lock(self):
         "Set night-lock"
-        command=self.getcommand(3,2)
+        command=self.getcommand(3)
         # print("COMMAND:" + str(command))
         resp = await self.apiclient.request("get", f"to_lock?command_signed_base64={command}")
         resp.raise_for_status()
     
     async def unlock(self):
         "Set day-lock"
-        command=self.getcommand(2,2)
+        command=self.getcommand(2)
         resp = await self.apiclient.request("get", f"to_lock?command_signed_base64={command}")
         resp.raise_for_status()
     
@@ -248,12 +249,12 @@ class LoqedAPI:
         """Initialize the API and store the auth so we can make requests."""
         self.apiclient = apiclient
 
-    async def async_get_lock(self, secret, bridgekey, name) -> Lock:
+    async def async_get_lock(self, secret, bridgekey, key_id, name) -> Lock:
         """Return the locks."""
         resp = await self.apiclient.request("get", "status")
         print("Response" + await resp.text())
         json_data = await resp.json(content_type='text/html')
-        return Lock(json_data, secret, bridgekey, name, self.apiclient)
+        return Lock(json_data, secret, bridgekey,  key_id, name, self.apiclient)
         # return [Lock(lock_data, self.apiclient) for lock_data in json_data["data"]]
 
 

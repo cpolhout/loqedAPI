@@ -2,8 +2,8 @@ from setuptools import find_packages, setup
 
 setup(
     name='loqedAPI',
-    version='0.1.2',    
-    description='Python package to use the Loqed Smart Door Lock APIs. To be used by Home Assistant.',
+    version='2.0.1',    
+    description='Python package to use the Loqed Smart Door Lock APIs in a local network. To be used by Home Assistant.',
     url='https://github.com/cpolhout/loqedAPI',
     author='Casper Polhout',
     author_email='cpolhout@gmail.com',    
