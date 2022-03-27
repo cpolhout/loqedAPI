@@ -145,9 +145,9 @@ class Lock:
         action_bin =  struct.pack("B", action)
         now=int(time.time())
         timenow_bin=now.to_bytes(8, 'big', signed=False)
-        local_generated_binary_hash = protocol_bin + command_type_bin + timenow_bin + self.key_id + device_id_bin + action_bin
+        local_generated_binary_hash = protocol_bin + command_type_bin + timenow_bin + local_key_id_bin + device_id_bin + action_bin
         hm=hmac.new(base64.b64decode(self.secret), local_generated_binary_hash,hashlib.sha256).digest()
-        command = messageId_bin + protocol_bin + command_type_bin + timenow_bin + hm + self.key_id + device_id_bin + action_bin
+        command = messageId_bin + protocol_bin + command_type_bin + timenow_bin + hm + local_key_id_bin + device_id_bin + action_bin
         return urllib.parse.quote(base64.b64encode(command).decode("ascii"))
 
 
@@ -190,7 +190,11 @@ class Lock:
         resp.raise_for_status()
         json_data = await resp.json(content_type='text/html')
         print("Response" + str(json_data))
-        self.webhooks=json_data
+        i=0
+        self.webhooks={}
+        for webhook in json_data:
+            i=i+1
+            self.webhooks[i]=json_data["url"]
         return json_data
 
     async def registerWebhook(self, url):
