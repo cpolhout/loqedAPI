@@ -1,0 +1,10 @@
+LICENSE
+README.md
+pyproject.toml
+setup.cfg
+setup.py
+loqedAPI.egg-info/PKG-INFO
+loqedAPI.egg-info/SOURCES.txt
+loqedAPI.egg-info/dependency_links.txt
+loqedAPI.egg-info/requires.txt
+loqedAPI.egg-info/top_level.txt

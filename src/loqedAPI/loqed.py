@@ -4,14 +4,12 @@ This is the local API integration. For the remote integration look at LoqedAPI_i
 """
 
 import logging
-import aiohttp
-#from .apiclient import APIClient
 from typing import List
 import os
 import json
 from abc import abstractmethod
-from asyncio import CancelledError, TimeoutError, get_event_loop
-from aiohttp import ClientError, ClientSession, ClientResponse
+from asyncio import get_event_loop
+from aiohttp import ClientSession, ClientResponse
 from typing import List
 import struct
 import time
@@ -21,7 +19,7 @@ import hashlib
 import urllib
 
 logging.basicConfig(level=os.environ.get("LOGLEVEL", "INFO"))
-log = logging.getLogger("trace")
+_LOGGER = logging.getLogger(__name__)
 
 class AbstractAPIClient():
     """Client to handle API calls."""
@@ -30,35 +28,18 @@ class AbstractAPIClient():
         """Initialize the client."""
         self.websession = websession
         self.host = host
-        print("API CLIENT CREATED")
-
-    # @abstractmethod
-    # async def async_get_access_token(self) -> str:
-    #     """Return a valid access token."""
+        _LOGGER.debug("API client created")
 
     async def request(self, method, url, **kwargs) -> ClientResponse:
         """Make a request."""
-        # headers = kwargs.get("headers")
-
-        # if headers is None:
-        #     headers = {}
-        # else:
-        #     headers = dict(headers)
-
-        # access_token = await self.async_get_access_token()
-        # headers["authorization"] = f"Bearer {access_token}"
-
         return await self.websession.request(
             method, f"{self.host}/{url}", **kwargs,
         )
-
 
 class APIClient(AbstractAPIClient):
     def __init__(self, websession: ClientSession, host: str):
         """Initialize the auth."""
         super().__init__(websession, host)
-
-        
 
 
 class Lock:
@@ -75,73 +56,38 @@ class Lock:
         self.name = name
         self.bolt_state= raw_data["bolt_state"]
         self.battery_percentage = raw_data["battery_percentage"]
+        self.last_key_id = ""
+        self.waitforstate = False
+        self.last_event = ""
+        self.id = self.raw_data["bridge_mac_wifi"]
     
+    @property
+    def battery_voltage(self) -> str:
+        """Return the ID of the lock."""
+        return self.raw_data["battery_voltage"]
 
     @property
-    def id(self) -> str:
+    def wifi_strength(self) -> str:
         """Return the ID of the lock."""
-        return self.raw_data["bridge_mac_wifi"]
-    
-    # @property
-    # def battery_percentage(self) -> int:
-    #     """Return the name of the lock."""
-    #     return self.battery_percentage
+        return self.raw_data["wifi_strength"]
+
+    @property
+    def ble_strength(self) -> str:
+        """Return the ID of the lock."""
+        return self.raw_data["ble_strength"]
 
     @property
     def battery_type(self) -> str:
         """Return the name of the lock."""
         return self.raw_data["battery_type"]
 
-    # @property
-    # def bolt_state(self) -> str:
-    #     """Return the state of the lock."""
-    #     return self.bolt_state
-
-    # @property
-    # def party_mode(self) -> bool:
-    #     """Return the name of the lock."""
-    #     return self.raw_data["party_mode"]
-
-    # @property
-    # def guest_access_mode(self) -> bool:
-    #     """Return the name of the lock."""
-    #     return self.raw_data["guest_access_mode"]
-
-    # @property
-    # def twist_assist(self) -> bool:
-    #     """Return the name of the lock."""
-    #     return self.raw_data["twist_assist"]
-
-    # @property
-    # def touch_to_connect(self) -> bool:
-    #     """Return the name of the lock."""
-    #     return self.raw_data["touch_to_connect"]
-    
-    # @property
-    # def lock_direction(self) -> str:
-    #     """Return the name of the lock."""
-    #     return self.raw_data["lock_direction"]
-    
-    # @property
-    # def mortise_lock_type(self) -> str:
-    #     """Return the name of the lock."""
-    #     return self.raw_data["mortise_lock_type"]
-
-    # @property
-    # def supported_lock_states(self) -> str:
-    #     """Return the name of the lock."""
-    #     return self.raw_data["supported_lock_states"]
-
     def getcommand(self,action):
-        messageId=0
-        protocol = 2
-        command_type = 7
-        device_id = 1
-        messageId_bin = struct.pack("Q", messageId)
-        protocol_bin = struct.pack("B", protocol)
-        command_type_bin = struct.pack("B", command_type)
+        """Creates a hashed command to send to the loqed lock"""
+        messageId_bin = struct.pack("Q", 0)
+        protocol_bin = struct.pack("B", 2)
+        command_type_bin = struct.pack("B", 7)
         local_key_id_bin = struct.pack("B", self.key_id)
-        device_id_bin = struct.pack("B", device_id)
+        device_id_bin = struct.pack("B", 1)
         action_bin =  struct.pack("B", action)
         now=int(time.time())
         timenow_bin=now.to_bytes(8, 'big', signed=False)
@@ -150,36 +96,33 @@ class Lock:
         command = messageId_bin + protocol_bin + command_type_bin + timenow_bin + hm + local_key_id_bin + device_id_bin + action_bin
         return urllib.parse.quote(base64.b64encode(command).decode("ascii"))
 
-
-    async def open(self):
-        "Open the lock"
-        command=self.getcommand(1)
+    async def sendcommand(self, type):
+        """Sends the hashed command to the loqed lock"""
+        command=self.getcommand(type)
         resp = await self.apiclient.request("get", f"to_lock?command_signed_base64={command}")
         resp.raise_for_status()
+        return resp
+
+    async def open(self):
+        "Open the lock"        
+        return await self.sendcommand(1)
 
     async def lock(self):
         "Set night-lock"
-        command=self.getcommand(3)
-        # print("COMMAND:" + str(command))
-        resp = await self.apiclient.request("get", f"to_lock?command_signed_base64={command}")
-        resp.raise_for_status()
+        return await self.sendcommand(3)
     
     async def unlock(self):
         "Set day-lock"
-        command=self.getcommand(2)
-        resp = await self.apiclient.request("get", f"to_lock?command_signed_base64={command}")
-        resp.raise_for_status()
+        return await self.sendcommand(2)
     
     async def update(self):
         "Update status"
-        resp = await self.apiclient.request("get", "locks")
+        resp = await self.apiclient.request("get", "status")
         resp.raise_for_status()
-        json_data = await resp.json()
-        for lock_data in json_data["data"]:
-            if lock_data["id"]==self.raw_data["id"]:
-                self.raw_data=lock_data
-                self.bolt_state=self.raw_data["bolt_state"]
-        print("Response UPDATED" + await resp.text())
+        json_data = await resp.json(content_type='text/html')
+        self.raw_data=json_data
+        self.bolt_state=self.raw_data["bolt_state"]
+        return json_data
 
     async def getWebhooks(self):
         "Get webhooks for this lock"
@@ -189,12 +132,8 @@ class Lock:
         resp = await self.apiclient.request("get", f"webhooks", headers=headers)
         resp.raise_for_status()
         json_data = await resp.json(content_type='text/html')
-        print("Response" + str(json_data))
-        i=0
+        _LOGGER.debug("get Webhooks Response: %s", str(json_data))
         self.webhooks={}
-        for webhook in json_data:
-            i=i+1
-            self.webhooks[i]=json_data["url"]
         return json_data
 
     async def registerWebhook(self, url):
@@ -219,7 +158,7 @@ class Lock:
         }
         resp = await self.apiclient.request("post", f"webhooks", json=json, headers=headers)
         resp.raise_for_status()
-        print("Response" + await resp.text())
+        _LOGGER.debug("Create webhook Response: %s", await resp.text())
         return "CREATED"
     
     async def deleteWebhook(self, id):
@@ -229,45 +168,80 @@ class Lock:
         headers = {'TIMESTAMP': str(now), 'HASH': hash}
         resp = await self.apiclient.request("delete", f"webhooks/" + id, headers=headers)
         resp.raise_for_status()
-        print("Response" + await resp.text())
+        _LOGGER.debug("Delete webhook Response: %s", await resp.text())
     
-    async def receiveWebhook(self, data):
+    async def receiveWebhook(self, body, hash, timestamp):
+        "Received webhook with hash. This method checks the hash."
+        timestamp=int(timestamp)
+        now=int(time.time())
+        data = json.loads(body) if body else {}
+        if data=={}:
+            error={"error": "Received invalid data from LOQED. Data needs to be formatted as JSON", "body": body, "hash": hash, "timestamp": timestamp, "now": now}
+            _LOGGER.error(
+                "ERROR: %s",error                
+            )
+            return error
+
+        if not isinstance(data, dict):
+            error={"error": "Received invalid data from LOQED. Data needs to be a dictionary", "body": body, "hash": hash, "timestamp": timestamp, "now": now}
+            _LOGGER.error(
+                "ERROR: %s",error                
+            )
+            return error
+        _LOGGER.debug(" Received timestamp: %s , current timestamp: %s", str(timestamp), str(now))
+        # check timestamp within 10 seconds
+        if (now-timestamp>10) or (timestamp-now>10):
+            error={"error": "Timestamp incorrect, possible replaying", "body": body, "hash": hash, "timestamp": timestamp, "now": now}
+            _LOGGER.error(
+                "ERROR: %s",error                
+            )
+            return error
+        chash=hashlib.sha256(body.encode() + timestamp.to_bytes(8, 'big', signed=False)+base64.b64decode(self.bridgekey)).hexdigest()
+        _LOGGER.debug("Received hash: %s , calculated hash: %s", hash, chash)
+        if chash!=hash:
+            error={"error": "Hash incorrect", "body": body, "hash": hash, "calculated_hash": chash, "timestamp": timestamp, "now": now}
+            _LOGGER.error(
+                "ERROR: %s",error                
+            )
+            return error
         if "battery_percentage" in data:
             self.battery_percentage=data["battery_percentage"]
-        etype=data["event_type"]
-        if etype.split("_")[1]=="state": 
-            self.bolt_state=str.replace(etype,"trigger_state_","")
-
-
-        
-
+        else:
+            self.last_event=data["event_type"].strip().lower()
+            # BOLT STATE CHANGE
+            if self.last_event.split("_")[0]=="state": 
+                self.bolt_state=str.replace(self.last_event,"state_changed_","")
+            else:
+                # BOLT IS CHANGING TO A STATE
+                if "night_lock" in self.last_event: self.bolt_state="locking"
+                if "open" in self.last_event: self.bolt_state="opening"
+                if "latch" in self.last_event: self.bolt_state="unlocking"
+            self.last_key_id=data["key_local_id"]
+        return data
 
     async def updateState(self, state):
         self.bolt_state=state
-
-
 
 class LoqedAPI:
 
     def __init__(self, apiclient: APIClient):
         """Initialize the API and store the auth so we can make requests."""
         self.apiclient = apiclient
-
-    async def async_get_lock(self, secret, bridgekey, key_id, name) -> Lock:
-        """Return the locks."""
+    
+    async def async_get_lock_details(self):
+        """Return lock_info"""
         resp = await self.apiclient.request("get", "status")
-        print("Response" + await resp.text())
+        resp.raise_for_status()
+        _LOGGER.debug("Response get lock details: %s",await resp.text())
         json_data = await resp.json(content_type='text/html')
+        return json_data
+
+    async def async_get_lock(self, secret, bridgekey, key_id, name, json_data=None) -> Lock:
+        """Return the locks with lock-data"""
+        if not json_data:
+            resp = await self.apiclient.request("get", "status")
+            json_data = await resp.json(content_type='text/html')
         return Lock(json_data, secret, bridgekey,  key_id, name, self.apiclient)
-        # return [Lock(lock_data, self.apiclient) for lock_data in json_data["data"]]
-
-
-# NOT supported in API Yet§
-    # async def async_get_lock(self, lock_id) -> Lock:
-    #     """Return a Lock."""
-    #     resp = await self.apiclient.request("get", f"lock/{lock_id}")
-    #     resp.raise_for_status()
-    #     return Lock(await resp.json(), self.apiclient)
 
 
 
