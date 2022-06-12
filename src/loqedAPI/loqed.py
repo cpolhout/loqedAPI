@@ -3,6 +3,7 @@ Loqed API integration
 This is the local API integration. For the remote integration look at LoqedAPI_internet
 """
 
+from enum import Enum
 import logging
 from typing import List
 import os
@@ -21,10 +22,15 @@ import urllib
 logging.basicConfig(level=os.environ.get("LOGLEVEL", "INFO"))
 _LOGGER = logging.getLogger(__name__)
 
+class Action(Enum):
+    OPEN = 1
+    UNLOCK = 2
+    LOCK = 3
+
 class AbstractAPIClient():
     """Client to handle API calls."""
 
-    def __init__(self, websession: ClientSession, host):
+    def __init__(self, websession: ClientSession, host: str):
         """Initialize the client."""
         self.websession = websession
         self.host = host
@@ -81,7 +87,7 @@ class Lock:
         """Return the name of the lock."""
         return self.raw_data["battery_type"]
 
-    def getcommand(self,action):
+    def getcommand(self, action:Action) -> str:
         """Creates a hashed command to send to the loqed lock"""
         messageId_bin = struct.pack("Q", 0)
         protocol_bin = struct.pack("B", 2)
@@ -96,24 +102,24 @@ class Lock:
         command = messageId_bin + protocol_bin + command_type_bin + timenow_bin + hm + local_key_id_bin + device_id_bin + action_bin
         return urllib.parse.quote(base64.b64encode(command).decode("ascii"))
 
-    async def sendcommand(self, type):
+    async def sendcommand(self, type: Action) -> ClientResponse:
         """Sends the hashed command to the loqed lock"""
         command=self.getcommand(type)
         resp = await self.apiclient.request("get", f"to_lock?command_signed_base64={command}")
         resp.raise_for_status()
         return resp
 
-    async def open(self):
+    async def open(self) -> ClientResponse:
         "Open the lock"        
-        return await self.sendcommand(1)
+        return await self.sendcommand(Action.OPEN)
 
-    async def lock(self):
+    async def lock(self) -> ClientResponse:
         "Set night-lock"
-        return await self.sendcommand(3)
+        return await self.sendcommand(Action.LOCK)
     
-    async def unlock(self):
+    async def unlock(self) -> ClientResponse:
         "Set day-lock"
-        return await self.sendcommand(2)
+        return await self.sendcommand(Action.UNLOCK)
     
     async def update(self):
         "Update status"
@@ -136,41 +142,41 @@ class Lock:
         self.webhooks={}
         return json_data
 
-    async def registerWebhook(self, url):
+    async def registerWebhook(self, url: str, flags:int = 511) -> str:
         "Register webhook for this lock subscribed to all events, first checks if its not already there"
         webhooks=await self.getWebhooks()
         for hook in webhooks:
             if hook["url"]==url: return "EXISTS ALREADY"
         now=int(time.time())
-        hash=hashlib.sha256(url.encode() + (511).to_bytes(4, 'big') + now.to_bytes(8, 'big', signed=False)+base64.b64decode(self.bridgekey)).hexdigest()
+        hash=hashlib.sha256(url.encode() + flags.to_bytes(4, 'big') + now.to_bytes(8, 'big', signed=False)+base64.b64decode(self.bridgekey)).hexdigest()
         headers = {'TIMESTAMP': str(now), 'HASH': hash}
         json = {
             "url" : url,
-            "trigger_state_changed_open" : 1,
-            "trigger_state_changed_latch" : 1,
-            "trigger_state_changed_night_lock" : 1,
-            "trigger_state_changed_unknown" : 1,
-            "trigger_state_goto_open" : 1,
-            "trigger_state_goto_latch" : 1,
-            "trigger_state_goto_night_lock" : 1,
-            "trigger_battery" : 1,
-            "trigger_online_status" : 1
+            "trigger_state_changed_open" : flags >> 0 & 1,
+            "trigger_state_changed_latch" : flags >> 1 & 1,
+            "trigger_state_changed_night_lock" : flags >> 2 & 1,
+            "trigger_state_changed_unknown" : flags >> 3 & 1,
+            "trigger_state_goto_open" : flags >> 4 & 1,
+            "trigger_state_goto_latch" : flags >> 5 & 1,
+            "trigger_state_goto_night_lock" : flags >> 6 & 1,
+            "trigger_battery" : flags >> 7 & 1,
+            "trigger_online_status" : flags >> 8 & 1
         }
-        resp = await self.apiclient.request("post", f"webhooks", json=json, headers=headers)
+        resp = await self.apiclient.request("post", "webhooks", json=json, headers=headers)
         resp.raise_for_status()
         _LOGGER.debug("Create webhook Response: %s", await resp.text())
         return "CREATED"
     
-    async def deleteWebhook(self, id):
+    async def deleteWebhook(self, id: int) -> None:
         "Delete webhook for this lock"
         now=int(time.time())
         hash=hashlib.sha256(id.to_bytes(8, 'big', signed=False) + now.to_bytes(8, 'big', signed=False)+base64.b64decode(self.bridgekey)).hexdigest()
         headers = {'TIMESTAMP': str(now), 'HASH': hash}
-        resp = await self.apiclient.request("delete", f"webhooks/" + id, headers=headers)
+        resp = await self.apiclient.request("delete", f"webhooks/{id}", headers=headers)
         resp.raise_for_status()
         _LOGGER.debug("Delete webhook Response: %s", await resp.text())
     
-    async def receiveWebhook(self, body, hash, timestamp):
+    async def receiveWebhook(self, body, hash: str, timestamp: str):
         "Received webhook with hash. This method checks the hash."
         timestamp=int(timestamp)
         now=int(time.time())
