@@ -212,6 +212,8 @@ class Lock:
             return error
         if "battery_percentage" in data:
             self.battery_percentage=data["battery_percentage"]
+        elif "ble_strength" in data:
+            self.raw_data["ble_strength"] = data["ble_strength"]
         else:
             self.last_event=data["event_type"].strip().lower()
             # BOLT STATE CHANGE
