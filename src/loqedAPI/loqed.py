@@ -65,6 +65,7 @@ class Lock:
         self.last_key_id = ""
         self.waitforstate = False
         self.last_event = ""
+        self.go_to_state = ""
         self.id = self.raw_data["bridge_mac_wifi"]
     
     @property
@@ -224,6 +225,7 @@ class Lock:
                 if "night_lock" in self.last_event: self.bolt_state="locking"
                 if "open" in self.last_event: self.bolt_state="opening"
                 if "latch" in self.last_event: self.bolt_state="unlocking"
+                self.go_to_state = sstr.replace(self.last_event,"go_to_state_","")
             self.last_key_id=data["key_local_id"]
         return data
 
