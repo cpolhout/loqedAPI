@@ -95,7 +95,7 @@ class Lock:
         command_type_bin = struct.pack("B", 7)
         local_key_id_bin = struct.pack("B", self.key_id)
         device_id_bin = struct.pack("B", 1)
-        action_bin =  struct.pack("B", action)
+        action_bin =  struct.pack("B", action.value)
         now=int(time.time())
         timenow_bin=now.to_bytes(8, 'big', signed=False)
         local_generated_binary_hash = protocol_bin + command_type_bin + timenow_bin + local_key_id_bin + device_id_bin + action_bin
