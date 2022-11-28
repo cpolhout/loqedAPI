@@ -5,7 +5,6 @@ setup.cfg
 setup.py
 src/loqedAPI/__init__.py
 src/loqedAPI/apiclient.py
-src/loqedAPI/const.py
 src/loqedAPI/exceptions.py
 src/loqedAPI/local_loqed.py
 src/loqedAPI/loqed.py
