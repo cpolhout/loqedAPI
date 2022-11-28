@@ -94,7 +94,7 @@ class Lock:
         command_type_bin = struct.pack("B", 7)
         local_key_id_bin = struct.pack("B", self.key_id)
         device_id_bin = struct.pack("B", 1)
-        action_bin =  struct.pack("B", action)
+        action_bin =  struct.pack("B", action.value)
         now=int(time.time())
         timenow_bin=now.to_bytes(8, 'big', signed=False)
         local_generated_binary_hash = protocol_bin + command_type_bin + timenow_bin + local_key_id_bin + device_id_bin + action_bin
@@ -244,7 +244,7 @@ class LoqedAPI:
         json_data = await resp.json(content_type='text/html')
         return json_data
 
-    async def async_get_lock(self, secret, bridgekey, key_id, name, json_data=None) -> Lock:
+    async def async_get_lock(self, secret: str, bridgekey: str, key_id: int, name: str, json_data=None) -> Lock:
         """Return the locks with lock-data"""
         if not json_data:
             resp = await self.apiclient.request("get", "status")
