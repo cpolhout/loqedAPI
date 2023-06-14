@@ -1,15 +1,12 @@
 Metadata-Version: 2.1
 Name: loqedAPI
-Version: 2.1.4
+Version: 2.1.6
 Summary: Python package to use the Loqed Smart Door Lock APIs in a local network. To be used by Home Assistant.
 Home-page: https://github.com/cpolhout/loqedAPI
 Author: Casper Polhout
 Author-email: cpolhout@gmail.com
 License: BSD 2-clause
 Project-URL: Bug Tracker, https://github.com/cpolhout/loqedAPI/issues
-Description: # Loqed Touch Smart Lock Python library
-        
-Platform: UNKNOWN
 Classifier: Development Status :: 1 - Planning
 Classifier: Intended Audience :: Science/Research
 Classifier: License :: OSI Approved :: BSD License
@@ -21,3 +18,6 @@ Classifier: Programming Language :: Python :: 3.4
 Classifier: Programming Language :: Python :: 3.5
 Requires-Python: >=3.6
 Description-Content-Type: text/markdown
+License-File: LICENSE
+
+# Loqed Touch Smart Lock Python library

@@ -13,3 +13,4 @@ src/loqedAPI.egg-info/SOURCES.txt
 src/loqedAPI.egg-info/dependency_links.txt
 src/loqedAPI.egg-info/requires.txt
 src/loqedAPI.egg-info/top_level.txt
+tests/test.py
