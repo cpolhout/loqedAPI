@@ -30,22 +30,33 @@ class Action(Enum):
 class AbstractAPIClient():
     """Client to handle API calls."""
 
-    def __init__(self, websession: ClientSession, host: str):
+    def __init__(self, websession: ClientSession, host: str, token: str | None = None):
         """Initialize the client."""
         self.websession = websession
         self.host = host
+        self.token = token
         _LOGGER.debug("API client created")
 
     async def request(self, method, url, **kwargs) -> ClientResponse:
         """Make a request."""
+        headers = kwargs.get("headers")
+
+        if headers is None:
+            headers = {}
+        else:
+            headers = dict(headers)
+
+        if self.token:
+            headers["authorization"] = f"Bearer {self.token}"
+
         return await self.websession.request(
-            method, f"{self.host}/{url}", **kwargs,
+            method, f"{self.host}/{url}", **kwargs, headers=headers,
         )
 
 class APIClient(AbstractAPIClient):
-    def __init__(self, websession: ClientSession, host: str):
+    def __init__(self, websession: ClientSession, host: str, token: str | None = None):
         """Initialize the auth."""
-        super().__init__(websession, host)
+        super().__init__(websession, host, token)
 
 
 class Lock:
@@ -251,8 +262,14 @@ class LoqedAPI:
             json_data = await resp.json(content_type='text/html')
         return Lock(json_data, secret, bridgekey,  key_id, name, self.apiclient)
 
+class LoqedCloudAPI:
+    def __init__(self, apiclient: APIClient):
+        self.apiclient = apiclient
 
-
+    async def async_get_locks(self):
+        resp = await self.apiclient.request("get", "/api/locks/")
+        resp.raise_for_status()
+        return await resp.json()
    
 """Loqed: Exceptions"""
 
