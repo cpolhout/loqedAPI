@@ -5,9 +5,11 @@ setup.cfg
 setup.py
 src/loqedAPI/__init__.py
 src/loqedAPI/apiclient.py
+src/loqedAPI/cloud_loqed.py
 src/loqedAPI/exceptions.py
 src/loqedAPI/local_loqed.py
 src/loqedAPI/loqed.py
+src/loqedAPI/urls.py
 src/loqedAPI.egg-info/PKG-INFO
 src/loqedAPI.egg-info/SOURCES.txt
 src/loqedAPI.egg-info/dependency_links.txt
