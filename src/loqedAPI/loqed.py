@@ -298,12 +298,12 @@ class Lock:
             if self.last_event.split("_")[0] == "state":
                 self.bolt_state = str.replace(self.last_event, "state_changed_", "")
             else:
-                # BOLT IS CHANGING TO A STATE
-                if "night_lock" in self.last_event:
+                # GOTO_STATE, only update the state if the target state is unequal to the current state
+                if "night_lock" in self.last_event and "night_lock" not in self.bolt_state:
                     self.bolt_state = "locking"
-                if "open" in self.last_event:
+                if "open" in self.last_event and "open" not in self.bolt_state:
                     self.bolt_state = "opening"
-                if "latch" in self.last_event:
+                if "latch" in self.last_event and "latch" not in self.bolt_state:
                     self.bolt_state = "unlocking"
             self.last_key_id = data["key_local_id"]
         return data
