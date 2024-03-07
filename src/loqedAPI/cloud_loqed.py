@@ -1,4 +1,5 @@
 import logging
+import os
 from aiohttp import ClientSession
 from .loqed import AbstractAPIClient
 from .urls import CLOUD_BASE_URL

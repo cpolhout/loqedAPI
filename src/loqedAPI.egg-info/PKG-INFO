@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: loqedAPI
-Version: 2.1.9
+Version: 2.1.10
 Summary: Python package to use the Loqed Smart Door Lock APIs in a local network. To be used by Home Assistant.
 Home-page: https://github.com/cpolhout/loqedAPI
 Author: Casper Polhout
