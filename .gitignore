@@ -1,0 +1,47 @@
+# Ignore Python cache and build artifacts
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+*.egg
+*.log
+*.sqlite3
+*.db
+
+# Ignore virtual environments
+.venv/
+venv/
+ENV/
+
+# Ignore test and coverage outputs
+.coverage
+htmlcov/
+.cache/
+.pytest_cache/
+
+# Ignore documentation build
+/docs/_build/
+
+# Ignore IDE/editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Ignore OS files
+.DS_Store
+Thumbs.db
+
+# Ignore all files except source
+!/src/
+!/tests/
+!/docs/
+!/setup.py
+!/setup.cfg
+!/pyproject.toml
+!/LICENSE
+!/README.md
+!/pytest.ini
