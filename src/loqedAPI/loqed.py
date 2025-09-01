@@ -90,22 +90,22 @@ class Lock:
 
     @property
     def battery_voltage(self) -> str:
-        """Return the ID of the lock."""
+        """Return the battery voltage of the lock."""
         return self.raw_data["battery_voltage"]
 
     @property
     def wifi_strength(self) -> str:
-        """Return the ID of the lock."""
+        """Return the Wifi strength of the lock."""
         return self.raw_data["wifi_strength"]
 
     @property
     def ble_strength(self) -> str:
-        """Return the ID of the lock."""
+        """Return the BLE strength of the lock."""
         return self.raw_data["ble_strength"]
 
     @property
     def battery_type(self) -> str:
-        """Return the name of the lock."""
+        """Return the battery type of the lock."""
         return self.raw_data["battery_type"]
 
     def getcommand(self, action: Action) -> str:
