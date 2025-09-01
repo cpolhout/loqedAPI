@@ -12,20 +12,19 @@ setup(
     install_requires=[
         "aiohttp",
         "async-timeout",
-        "pytest",
-        "pytest-asyncio",
-        "pytest-cov",
-        "aioresponses"
     ],
+    extras_require={
+        "dev": [
+            "pytest",
+            "pytest-asyncio",
+            "pytest-cov",
+            "aioresponses",
+        ]
+    },
     classifiers=[
-        "Development Status :: 1 - Planning",
-        "Intended Audience :: Science/Research",
+        "Development Status :: 4 - Beta",
+        "Intended Audience :: Developers",
         "License :: OSI Approved :: BSD License",
-        "Operating System :: POSIX :: Linux",
-        "Programming Language :: Python :: 2",
-        "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.4",
-        "Programming Language :: Python :: 3.5",
     ],
 )

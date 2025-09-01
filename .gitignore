@@ -1,4 +1,5 @@
 # Ignore Python cache and build artifacts
+/.eggs/
 __pycache__/
 *.pyc
 *.pyo
