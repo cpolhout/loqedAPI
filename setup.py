@@ -9,7 +9,14 @@ setup(
     author_email="cpolhout@gmail.com",
     license="BSD 2-clause",
     packages=find_packages(exclude=["tests", "generator"]),
-    install_requires=["aiohttp", "async-timeout"],
+    install_requires=[
+        "aiohttp",
+        "async-timeout",
+        "pytest",
+        "pytest-asyncio",
+        "pytest-cov",
+        "aioresponses"
+    ],
     classifiers=[
         "Development Status :: 1 - Planning",
         "Intended Audience :: Science/Research",

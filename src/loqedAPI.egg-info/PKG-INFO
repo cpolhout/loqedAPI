@@ -1,4 +1,4 @@
-Metadata-Version: 2.1
+Metadata-Version: 2.4
 Name: loqedAPI
 Version: 2.1.10
 Summary: Python package to use the Loqed Smart Door Lock APIs in a local network. To be used by Home Assistant.
@@ -21,5 +21,13 @@ Description-Content-Type: text/markdown
 License-File: LICENSE
 Requires-Dist: aiohttp
 Requires-Dist: async-timeout
+Dynamic: author
+Dynamic: author-email
+Dynamic: classifier
+Dynamic: home-page
+Dynamic: license
+Dynamic: license-file
+Dynamic: requires-dist
+Dynamic: summary
 
 # Loqed Touch Smart Lock Python library

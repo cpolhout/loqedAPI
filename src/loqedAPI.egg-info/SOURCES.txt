@@ -16,3 +16,6 @@ src/loqedAPI.egg-info/dependency_links.txt
 src/loqedAPI.egg-info/requires.txt
 src/loqedAPI.egg-info/top_level.txt
 tests/test.py
+tests/test_cloud_loqed.py
+tests/test_local_loqed.py
+tests/test_loqed.py
