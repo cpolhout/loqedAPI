@@ -166,7 +166,7 @@ class Lock:
         "Update status"
         resp = await self.apiclient.request("get", "status")
         resp.raise_for_status()
-        json_data = await resp.json(content_type="text/html")
+        json_data = await resp.json(content_type=None)
         self.raw_data = json_data
         self.bolt_state = self.raw_data["bolt_state"]
         return json_data
@@ -180,7 +180,7 @@ class Lock:
         headers = {"TIMESTAMP": str(now), "HASH": hash}
         resp = await self.apiclient.request("get", f"webhooks", headers=headers)
         resp.raise_for_status()
-        json_data = await resp.json(content_type="text/html")
+        json_data = await resp.json(content_type=None)
         _LOGGER.debug("get Webhooks Response: %s", str(json_data))
         self.webhooks = {}
         return json_data
@@ -322,7 +322,7 @@ class LoqedAPI:
         resp = await self.apiclient.request("get", "status")
         resp.raise_for_status()
         _LOGGER.debug("Response get lock details: %s", await resp.text())
-        json_data = await resp.json(content_type="text/html")
+        json_data = await resp.json(content_type=None)
         return json_data
 
     async def async_get_lock(
@@ -331,7 +331,7 @@ class LoqedAPI:
         """Return the locks with lock-data"""
         if not json_data:
             resp = await self.apiclient.request("get", "status")
-            json_data = await resp.json(content_type="text/html")
+            json_data = await resp.json(content_type=None)
         return Lock(json_data, secret, bridgekey, key_id, name, self.apiclient)
 
 
